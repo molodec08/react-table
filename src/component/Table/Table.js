@@ -12,7 +12,7 @@ export const Table = ({ tbody }) => {
   const { items, requestSort} = Sorting(filteredItem);
   const { paginatedItem, nextPage, prevPage, page, hasNextPage, changeSize } = Pagination(items);
 
-  const handleChange = e => {
+  const handleChangeSize = e => {
     changeSize(e.target.value);
     setSize(e.target.value);
   }
@@ -50,6 +50,7 @@ export const Table = ({ tbody }) => {
         onChange={filteredName}
         type="text"
         name={'name'}
+        defaultValue={'DEFAULT'}
         title={'Имя'}
         placeholder = {'Напишите имя'}
       />
@@ -119,7 +120,7 @@ export const Table = ({ tbody }) => {
         name={'size'}
         options = {sizeOptions}
         value = {size}
-        changeHandler = {handleChange}
+        changeHandler = {handleChangeSize}
         placeholder = {'Выберите размер таблицы'}
         className={s.select}
       />

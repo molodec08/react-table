@@ -1,24 +1,24 @@
-import { useMemo,useState } from "react";
+import { useMemo, useRef, useState} from "react";
 
 export const Filter = (items) => {
   const [filter, setFilter] = useState(null);
 
-  let filterableItem = [...items];
+  let filteredItem = useRef();
 
   const filterItems = useMemo(() => {
-
     if (filter !== null) {
-      items = filterableItem.filter(item => {
+      filteredItem.current = filteredItem.current.filter(item => {
         return item[filter.key]
           .toUpperCase()
           .indexOf(filter.value.toUpperCase()) !== -1
       });
     }
-  }, [items, filter])
+  }, [filter])
 
   const requestFilter = (value, key) => {
+    filteredItem.current = [...items];
     setFilter({value, key})
   }
 
-  return { filteredItem: items, requestFilter, filterItems }
+  return { filteredItem: filteredItem.current ? filteredItem.current : items, requestFilter, filterItems }
 }

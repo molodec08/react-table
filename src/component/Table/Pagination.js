@@ -11,7 +11,6 @@ export const Pagination = (items) => {
   const endIndex = () => {
     return page * size
   }
-  console.log(items);
   const nextPage = () => {
     setPage(page+1);
   }
