@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import s from './Table.module.css';
 import { Select } from '../Select';
+import { TableBody } from './TableBody';
 
 import { Sorting } from './Sorting';
 import { Pagination } from './Pagination';
 import { Filter } from './Filter';
 
-export const Table = ({ tbody }) => {
+export const Table = ({ data, sizeTable, filters }) => {
+  const [tableHead, setTableHead] = useState([]);
+
   const [size, setSize] = useState(10);
-  const { filteredItem, requestFilter } = Filter(tbody)
+  const settingsSizeTable = sizeTable.settings;
+  const optionsSizeTable = sizeTable.options;
+
+  const { filteredItem, requestFilter } = Filter(data)
   const { items, requestSort} = Sorting(filteredItem);
   const { paginatedItem, nextPage, prevPage, page, hasNextPage, changeSize } = Pagination(items);
+
 
   const handleChangeSize = e => {
     changeSize(e.target.value);
@@ -21,116 +28,85 @@ export const Table = ({ tbody }) => {
     requestFilter(e.target.value, e.target.name);
   }
 
-  const sizeOptions = [
-    { id: 1, value: 10, label: 10 },
-    { id: 2, value: 20, label: 20 },
-    { id: 3, value: 30, label: 30 },
-    { id: 4, value: 40, label: 40 },
-    { id: 5, value: 50, label: 50 }
-  ];
-
-  const statusOptions = [
-    { id: 1, value: 'alive', label: 'Alive' },
-    { id: 2, value: 'dead', label: 'Dead' },
-    { id: 3, value: 'unknown', label: 'unknown' }
-  ];
-
-  const speciedOptions = [
-    { id: 1, value: 'alien', label: 'Alien' },
-    { id: 2, value: 'animal', label: 'Animal' },
-    { id: 3, value: 'human', label: 'Human' },
-    { id: 4, value: 'mythological creature', label: 'Mythological Creature' },
-    { id: 5, value: 'poopybutthole', label: 'Poopybutthole' },
-    { id: 6, value: 'unknown', label: 'unknown' }
-  ];
+  useEffect(() => {
+    if (data.length) {
+      setTableHead(Object.keys(data[0]));
+    }
+  }, [data]);
 
   return (
     <>
-      <input
-        onChange={filteredName}
-        type="text"
-        name={'name'}
-        defaultValue={'DEFAULT'}
-        title={'Имя'}
-        placeholder = {'Напишите имя'}
-      />
-      <Select
-        title={'Status'}
-        name={'status'}
-        options={statusOptions}
-        changeHandler = {filteredName}
-        placeholder = {'Select status'}
-        className={s.select}
-      />
-      <Select
-        title={'Species'}
-        name={'species'}
-        options = {speciedOptions}
-        changeHandler = {filteredName}
-        placeholder = {'Select species'}
-        className={s.select}
-      />
+      <div className="filters">
+        { filters.map(filter => {
+          const setting = filter.settings;
+          const options = filter.options;
+          if (setting.type === 'input') {
+            return (
+              <input key={setting.name}
+                onChange={filteredName}
+                type="text"
+                name={setting.name}
+                defaultValue={''}
+                title={setting.title}
+                placeholder = {setting.placeholder}
+              />
+            )
+          } else {
+            return (
+              <Select key={setting.name}
+                title={setting.title}
+                name={setting.name}
+                options={options}
+                changeHandler = {filteredName}
+                placeholder = {setting.placeholder}
+                className={s.select}
+              />
+            )
+          }
+
+        })}
+      </div>
+
       <table className={s.table}>
         <thead>
+        {
           <tr>
-            <th onClick={() => requestSort('id')} >
-              id
-            </th>
-            <th onClick={() => requestSort('name')}>
-              Name
-            </th>
-            <th onClick={() => requestSort('status')}>
-              Status
-            </th>
-            <th onClick={() => requestSort('species')}>
-              Species
-            </th>
-            <th>Avatar</th>
+          { tableHead.map((head, i) => {
+              return (
+                <th key={i} onClick={() => requestSort({head})} >
+                  {head}
+                </th>
+              )
+            }
+          )}
           </tr>
-        </thead>
-        <tbody>
-        { paginatedItem.map(character => {
-          return (
-            <tr key={character.id}>
-              <td>{character.id}</td>
-              <td>{character.name}</td>
-              <td>{character.status}</td>
-              <td>{character.species}</td>
-              <td>
-                <img
-                  className={s.avatar}
-                  src={character.image}
-                  alt={character.name}
-                />
-              </td>
-            </tr>
-          )})
         }
-        </tbody>
+        </thead>
+        <TableBody data={paginatedItem}/>
       </table>
-      <a
-        className="waves-effect waves-light btn-small"
+      <button
         onClick={() => prevPage()}
         disabled={page === 1}
+        className="waves-effect waves-light btn-small"
       >
         Назад
-      </a>
+      </button>
       <Select
-        title={'Размер таблицы'}
-        name={'size'}
-        options = {sizeOptions}
+        title={settingsSizeTable.title}
+        name={settingsSizeTable.name}
+        options = {optionsSizeTable}
         value = {size}
         changeHandler = {handleChangeSize}
-        placeholder = {'Выберите размер таблицы'}
+        placeholder = {settingsSizeTable.placeholder}
         className={s.select}
       />
-      <a
+      <button
         className="waves-effect waves-light btn-small"
         disabled={hasNextPage}
         onClick={() => nextPage()}
       >
         Вперёд
-      </a>
+      </button>
     </>
   )
 }
