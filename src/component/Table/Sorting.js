@@ -20,6 +20,7 @@ export const Sorting = (items) => {
   }, [items, sortField]);
 
   const requestSort = (key) => {
+    key = Object.values(key)[0];
     let direction = 'ascending';
     if (sortField && sortField.key === key && sortField.direction === 'ascending') {
       direction = 'descending';
